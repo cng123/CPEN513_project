@@ -57,9 +57,16 @@ class GeneticPartition():
 	def run(self):
 		start = time.time()
 		self.init_population()
+
+		self.it = 0
+		self.swaps = 0
+		self.paren_replace = 0
+
+		self.prev_best = None
+		self.best_replace = 0
 		print("[{:.2f}] Population Initialized".format(time.time() - start))
 
-		for _ in range(1000):
+		while not self.stopping_cond():
 			# select parents
 			max_c = max([p[1] for p in self.pop])
 			min_c = min([p[1] for p in self.pop])
@@ -115,6 +122,7 @@ class GeneticPartition():
 				# replace both parents
 				self.pop[ps[0][0]] = (offspring0, o0_cost)
 				self.pop[ps[1][0]] = (offspring1, o1_cost)
+				self.paren_replace += 2
 			
 			# case 2: both offsprings are worse than both parents
 				# replace worst genes in population
@@ -125,12 +133,44 @@ class GeneticPartition():
 				# replace worse parent and worst gene in population
 				self.pop[ps[1][0]] = (offspring0, o0_cost)
 				self.pop[replace[0][0]] = (offspring1, o1_cost)
+				self.paren_replace += 1
 		
+			new_best = min(self.pop, key=lambda x: x[1])
 			# log best solution
-			print("[{:.2f}] Best solution so far: {}".format(time.time() - start, min(self.pop, 
-			                                            key=lambda x: x[1])))
+			print("[{:.2f}] Best solution so far: {} (it={})".format(
+				time.time() - start, 
+				new_best, 
+				self.it))
+			if self.prev_best == None or self.prev_best > new_best[1]:
+				self.prev_best = new_best[1]
+				self.best_replace += 1
+			self.it += 1
 
-		print("[{:.2f}] Best solution: {}".format(time.time() - start, min(self.pop, key=lambda x: x[1])))
+		print("[{:.2f}] Algorithm ended (Stopping condition: {})".format(
+			time.time() - start, 
+			"MAX_ITER REACHED" if self.it >= 3000 else 
+			"BEST SOL CONVERAGED AFTER {} ITS".format(self.it)))
+		print("[{:.2f}] Best solution: {}".format(
+			time.time() - start, min(self.pop, key=lambda x: x[1])))
+		self.print_summary()
+
+	def print_summary(self):
+		print("Num Nodes: {}".format(self.num_cells))
+		print("Avg Degree: {:.2f}".format(
+			sum([len(v) for _, v in self.node_to_net.items()])/self.num_cells))
+		print("Num Nets: {}".format(self.num_nets))
+		print("Avg Net Size: {:.2f}".format(
+			sum([len(x) for x in self.nets])/self.num_nets))
+		print("Num Local Improvement Swaps: {} (Avg: {:.2f})".format(
+			self.swaps, self.swaps/self.it))
+		print("Num Parent Replacements: {}".format(self.paren_replace))
+		print("Num Best Replacements: {}".format(self.best_replace))
+	
+	def stopping_cond(self):
+		if self.it >= 3000:
+			return True
+		quality = sorted([x[1] for x in self.pop])
+		return quality[0] == quality[int(len(quality)*0.8)]
 
 	# given a potentially imbalanced gene, balance it
 	def adjust(self, sol):
@@ -245,7 +285,8 @@ class GeneticPartition():
 					for n in self.node_to_net[p]:
 						for nn in self.nets[n]:
 							if nn not in lswap and nn not in rswap:
-								gain_dict = lgains if updated_sol[nn] == "L" else rgains
+								gain_dict = lgains if \
+									updated_sol[nn] == "L" else rgains
 								if updated_sol[nn] == updated_sol[p]:
 									gain_dict[nn] -= 2/len(self.nets[n])
 								else:
@@ -257,6 +298,7 @@ class GeneticPartition():
 		# construct list of indices to flip
 		flip_list = lswap[:max_gain[0]+1]
 		flip_list.extend(rswap[:max_gain[0]+1])
+		self.swaps += max_gain[0]
 
 		return self.flip(sol, flip_list)
 
