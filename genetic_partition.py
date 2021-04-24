@@ -103,6 +103,15 @@ class GeneticPartition():
 				# flip segments of parent 1 for offspring 1
 				offspring1 += seg if parent == 0 else self.complement(seg)
 
+			# apply mutation
+			if self.num_cells >= 100:
+				m = random.randrange(self.num_cells//100 + 1)
+				if m > 0:
+					mutate = np.random.choice(
+						list(range(self.num_cells)), m, replace=False)
+					offspring0 = self.flip(offspring0, mutate)
+					offspring1 = self.flip(offspring1, mutate)
+
 			# adjust/rebalance gene and apply local improvement
 			offspring0 = self.local_improvement(self.adjust(offspring0))
 			offspring1 = self.local_improvement(self.adjust(offspring1))
