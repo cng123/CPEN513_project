@@ -7,13 +7,14 @@ from functools import reduce
 import time
 
 class GeneticPartition():
-	def __init__(self, params, pop_count, hyper):
+	def __init__(self, params, pop_count, hyper, no_local=False):
 		random.seed(0)
 		np.random.seed(0)
 		self.num_cells = params["num_cells"]
 
 		self.nets      = params["nets"]
 		self.num_nets  = len(params["nets"])
+		self.no_local  = no_local
 
 		self.pop_count = pop_count
 
@@ -113,8 +114,12 @@ class GeneticPartition():
 					offspring1 = self.flip(offspring1, mutate)
 
 			# adjust/rebalance gene and apply local improvement
-			offspring0 = self.local_improvement(self.adjust(offspring0))
-			offspring1 = self.local_improvement(self.adjust(offspring1))
+			offspring0 = self.adjust(offspring0)			
+			offspring1 = self.adjust(offspring1)
+			
+			if not self.no_local:
+				offspring0 = self.local_improvement(offspring0)
+				offspring1 = self.local_improvement(offspring1)
 			o0_cost = self.calc_cost(offspring0)
 			o1_cost = self.calc_cost(offspring1)
 			ol = o0_cost if o0_cost <  o1_cost else o1_cost

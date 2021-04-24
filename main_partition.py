@@ -40,12 +40,15 @@ if __name__ == "__main__":
 	parser.add_argument(
 		"--gui",
 		action="store_true")
+	parser.add_argument(
+		"--no_local",
+		action="store_true")
 
 	args = parser.parse_args()
 
 	param = parse_benchmark(open(args.b))
 
-	alg = GeneticPartition(param, 50, args.net)
+	alg = GeneticPartition(param, 50, args.net, args.no_local)
 	sol = alg.run()
 
 	if args.gui:
