@@ -62,7 +62,8 @@ class GeneticPartition():
 		self.swaps = 0
 		self.paren_replace = 0
 
-		self.prev_best = None
+		prev_best = None
+		results = []
 		self.best_replace = 0
 		print("[{:.2f}] Population Initialized".format(time.time() - start))
 
@@ -136,13 +137,15 @@ class GeneticPartition():
 				self.paren_replace += 1
 		
 			new_best = min(self.pop, key=lambda x: x[1])
+			results.append(new_best)
+			
 			# log best solution
 			print("[{:.2f}] Best solution so far: {} (it={})".format(
 				time.time() - start, 
 				new_best, 
 				self.it))
-			if self.prev_best == None or self.prev_best > new_best[1]:
-				self.prev_best = new_best[1]
+			if prev_best == None or prev_best > new_best[1]:
+				prev_best = new_best[1]
 				self.best_replace += 1
 			self.it += 1
 
@@ -152,7 +155,13 @@ class GeneticPartition():
 			"BEST SOL CONVERAGED AFTER {} ITS".format(self.it)))
 		print("[{:.2f}] Best solution: {}".format(
 			time.time() - start, min(self.pop, key=lambda x: x[1])))
+		
+		self.run_time = time.time() - start
+		
+		if not results:
+			results.append(min(self.pop, key=lambda x: x[1]))
 		self.print_summary()
+		return results
 
 	def print_summary(self):
 		print("Num Nodes: {}".format(self.num_cells))
@@ -162,9 +171,11 @@ class GeneticPartition():
 		print("Avg Net Size: {:.2f}".format(
 			sum([len(x) for x in self.nets])/self.num_nets))
 		print("Num Local Improvement Swaps: {} (Avg: {:.2f})".format(
-			self.swaps, self.swaps/self.it))
+			self.swaps, self.swaps/self.it if self.it else 0))
 		print("Num Parent Replacements: {}".format(self.paren_replace))
 		print("Num Best Replacements: {}".format(self.best_replace))
+		print("Total Runtime: {:.2f} sec ({:.2f} sec/it)".format(
+			self.run_time, self.run_time/self.it if self.it else 0))
 	
 	def stopping_cond(self):
 		if self.it >= 3000:
