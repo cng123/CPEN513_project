@@ -55,10 +55,14 @@ if __name__ == "__main__":
 		r.load(param["num_cells"], param["nets"], sol)
 
 		top.mainloop()
+		fig, ax = plt.subplots(1,1)
+		ax.set_title("Cost of Best Gene over Iterations")
+		ax.set_xlabel("Iterations")
+		ax.set_ylabel("Cost")
 
 		if len(sol) > 1:
-			plt.plot([x[1] for x in sol])
+			ax.plot([x[1] for x in sol])
 		# if no iterations are run, render scatter for single datapoint
 		else:
-			plt.scatter([0], [sol[0][1]])
+			ax.scatter([0], [sol[0][1]])
 		plt.show()

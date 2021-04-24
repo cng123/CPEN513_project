@@ -174,7 +174,7 @@ class GeneticPartition():
 			self.swaps, self.swaps/self.it if self.it else 0))
 		print("Num Parent Replacements: {}".format(self.paren_replace))
 		print("Num Best Replacements: {}".format(self.best_replace))
-		print("Total Runtime: {:.2f} sec ({:.2f} sec/it)".format(
+		print("Total Runtime: {:.2f} sec ({:.4f} sec/it)".format(
 			self.run_time, self.run_time/self.it if self.it else 0))
 	
 	def stopping_cond(self):

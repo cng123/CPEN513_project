@@ -122,7 +122,7 @@ class Renderer(tk.Frame):
 			self.restart.configure(state=tk.NORMAL)
 		# else, keep rendering next frame after some delay
 		else:
-			self.after(1, self.start_callback)
+			self.after(100, self.start_callback)
 
 	# callback for when restart button is pressed
 	def restart_callback(self):
