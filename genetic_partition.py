@@ -151,7 +151,7 @@ class GeneticPartition():
 				self.paren_replace += 1
 		
 			new_best = min(self.pop, key=lambda x: x[1])
-			results.append(new_best)
+			results.append((new_best, [x[1] for x in self.pop]))
 			
 			# log best solution
 			print("[{:.2f}] Best solution so far: {} (it={})".format(
@@ -173,7 +173,8 @@ class GeneticPartition():
 		self.run_time = time.time() - start
 		
 		if not results:
-			results.append(min(self.pop, key=lambda x: x[1]))
+			results.append(
+				(min(self.pop, key=lambda x: x[1]), [x[1] for x in self.pop]))
 		self.print_summary()
 		return results
 
