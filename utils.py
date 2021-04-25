@@ -57,8 +57,13 @@ def print_chromosome(chromosome):
     x = []
     y = []
     for gene in chromosome:
-        cell_num.append(gene.cell_num)
-        x.append(gene.x)
-        y.append(gene.y)
+        if gene:
+            cell_num.append(gene.cell_num)
+            x.append(gene.x)
+            y.append(gene.y)
+        else:
+            cell_num.append(-1)
+            x.append(-1)
+            y.append(-1)
     print(tabulate([x, y], headers=cell_num))
     print("")
