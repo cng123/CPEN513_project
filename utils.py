@@ -1,6 +1,7 @@
 import random
 from math import floor
 import numpy as np
+from tabulate import tabulate
 
 def preprocess(file):
     #read file as lines
@@ -13,7 +14,7 @@ def preprocess(file):
     nets = []
 
     #save nets info
-    for i in range(2, 2+2*net_num, 2):
+    for i in range(1, 1+net_num):
         curr_net = f[i].split()
         nets.append(set([int(i) for i in curr_net][1:]))
 
@@ -50,3 +51,19 @@ def initialize(ny, nx, cell_num, nets):
         nets_info.append(net_obj)
 
     return cells_pos, nets_info, cells_info, grid, cost
+
+def print_chromosome(chromosome):
+    cell_num = []
+    x = []
+    y = []
+    for gene in chromosome:
+        if gene:
+            cell_num.append(gene.cell_num)
+            x.append(gene.x)
+            y.append(gene.y)
+        else:
+            cell_num.append(-1)
+            x.append(-1)
+            y.append(-1)
+    print(tabulate([x, y], headers=cell_num))
+    print("")
