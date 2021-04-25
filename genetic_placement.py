@@ -1,5 +1,5 @@
 import random
-from math import floor
+from math import floor, ceil
 from statistics import mean
 import numpy as np
 import copy
@@ -15,7 +15,7 @@ class gene():
 		self.y = y
 
 class GeneticPlacement():
-	def __init__(self, benchmark, generation_num, inversion_rate, mutation_rate, w_x, w_y, crossover_type="order", population_size=24, crossover_rate=1.0):
+	def __init__(self, benchmark, generation_num, inversion_rate, mutation_rate, w_x=1, w_y=2, crossover_type="order", population_size=24, crossover_rate=1.0):
 		self.ny, self.nx, self.total_cell_num, self.nets = preprocess("benchmarks_a2/"+benchmark+".txt")
 		self.crossover_rate = crossover_rate
 		self.inversion_rate = inversion_rate
@@ -72,14 +72,29 @@ class GeneticPlacement():
 		self.population = []
 		for i in range(self.population_size):
 			chromosome = []
-			# randomly generate initial positions
-			rand_positions = random.sample(range(self.ny*self.nx), self.total_cell_num)
-			# decode pos into x, y coordinates, and update on grid
-			for cell_num, pos in enumerate(rand_positions):
+			cells = list(range(self.total_cell_num))
+			random.shuffle(cells)
+			x = 0
+			y = random.randint(0, self.ny-1-ceil(self.nx/self.total_cell_num))
+			for cell_num in cells:
 				new_gene = gene(cell_num)
-				new_gene.update_location(pos%self.nx, floor(pos/self.nx))
+				new_gene.update_location(x, y)
 				chromosome.append(new_gene)
+				x += 1
+				if x >= self.nx:
+					x = 0
+					y += 1
+				if y >= self.ny:
+					y = 0
 			self.population.append(chromosome)
+			# # randomly generate initial positions
+			# rand_positions = random.sample(range(self.ny*self.nx), self.total_cell_num)
+			# # decode pos into x, y coordinates, and update on grid
+			# for cell_num, pos in enumerate(rand_positions):
+			# 	new_gene = gene(cell_num)
+			# 	new_gene.update_location(pos%self.nx, floor(pos/self.nx))
+			# 	chromosome.append(new_gene)
+			# self.population.append(chromosome)
 
 	def evaluate_fitness(self, chromosome):
 		cost = 0
