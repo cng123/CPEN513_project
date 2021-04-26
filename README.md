@@ -37,8 +37,7 @@ To run:
 ```
 python3 main_placement.py
 ```
-
 All the parameters and benchmarks can be set in main_placement.py
 ### Cost Plot
 The cost plot can be dynamically displayed if plot_enable=True, otherwise a final cost plot is saved.
-![alt text](./fig/placement/alu2.txt "Plot Example")
+![alt text](./fig/placement/alu2.png "Plot Example")
