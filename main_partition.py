@@ -4,6 +4,7 @@ import math
 import tkinter as tk
 from genetic_partition import GeneticPartition
 from GUI_partition import Renderer
+from GUI_heatmap import HeatmapRenderer 
 import matplotlib.pyplot as plt
 
 def parse_benchmark(f):
@@ -55,17 +56,23 @@ if __name__ == "__main__":
 		top = tk.Tk()
 		r = Renderer(top)
 		r.pack()
-		r.load(param["num_cells"], param["nets"], sol)
-
+		r.load(param["num_cells"], param["nets"], [x[0] for x in sol])
 		top.mainloop()
+
+		top = tk.Tk()
+		h = HeatmapRenderer(top)
+		h.load([x[1] for x in sol])
+		h.pack()
+		top.mainloop()
+
 		fig, ax = plt.subplots(1,1)
 		ax.set_title("Cost of Best Gene over Iterations")
 		ax.set_xlabel("Iterations")
 		ax.set_ylabel("Cost")
 
 		if len(sol) > 1:
-			ax.plot([x[1] for x in sol])
+			ax.plot([x[0][1] for x in sol])
 		# if no iterations are run, render scatter for single datapoint
 		else:
-			ax.scatter([0], [sol[0][1]])
+			ax.scatter([0], [sol[0][0][1]])
 		plt.show()
