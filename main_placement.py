@@ -3,8 +3,8 @@ import numpy as np
 from genetic_placement import *
 from utils import print_chromosome
 
-# benchmarks = ["alu2","apex1","apex4","c880","cm138a","cm150a","cm151a","cm162a","cps","e64","paira","pairb"]
-benchmarks = ["c880","cm138a","cm150a","cm151a","cm162a"]
+benchmarks = ["alu2","apex1","apex4","c880","cm138a","cm150a","cm151a","cm162a","cps","e64","paira","pairb"]
+# benchmarks = ["cm138a","cm150a","cm151a","cm162a", "c880"]
 if __name__ == "__main__":
 	#The mutation rate can vary from 0 to 10% in steps of 0.5%
 	# the inversion rate can vary from 0 to 100% in steps of 5%

@@ -1,6 +1,10 @@
 import random
 from math import floor
 import numpy as np
+
+import seaborn as sns
+from matplotlib import pyplot as plt
+from matplotlib import colors
 from tabulate import tabulate
 
 def preprocess(file):
@@ -20,38 +24,6 @@ def preprocess(file):
 
     return ny, nx, cell_num, nets
 
-def initialize(ny, nx, cell_num, nets):
-    cells_pos = {}
-    nets_info = []
-    cells_info = [[] for i in range(cell_num)]
-    grid = np.full((ny,nx), -1)
-    cost = 0
-
-    # randomly generate initial positions
-    random.seed(10)
-    pos = random.sample(range(ny*nx), cell_num)
-
-    # decode pos into x, y coordinates, and update on grid
-    for i,n in enumerate(pos):
-        cells_pos[i] = [floor(n/nx), n%nx]
-        grid[floor(n/nx)][n%nx] = i
-
-    # create net objects for each net, and save initial information
-    for i,net in enumerate(nets):
-        pos = cells_pos[net[0]]
-        net_obj = Net(pos, net[0], net)
-        cells_info[net[0]].append(i)
-        for c in net[1:]:
-            # add all cells of net to net object
-            net_obj.add_cell(cells_pos[c], c)
-            # save the nets each cell is in
-            cells_info[c].append(i)
-        # calculate initial cost
-        cost += net_obj.update_cost()
-        nets_info.append(net_obj)
-
-    return cells_pos, nets_info, cells_info, grid, cost
-
 def print_chromosome(chromosome):
     cell_num = []
     x = []
@@ -67,3 +39,16 @@ def print_chromosome(chromosome):
             y.append(-1)
     print(tabulate([x, y], headers=cell_num))
     print("")
+
+def plot(avg_cost, min_cost, max_cost, diff):
+    plt.title('cost over generations')
+    plt.plot(avg_cost)
+
+    x = np.arange(len(avg_cost))
+    y_bot = min_cost
+    y_dif = diff
+    plt.bar(x, y_dif, bottom=y_bot)
+
+    plt.show(block=False)
+    plt.pause(1)
+    plt.close()

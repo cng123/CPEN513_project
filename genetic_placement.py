@@ -15,7 +15,8 @@ class gene():
 		self.y = y
 
 class GeneticPlacement():
-	def __init__(self, benchmark, generation_num, inversion_rate, mutation_rate, w_x=1, w_y=2, crossover_type="order", population_size=24, crossover_rate=1.0):
+	def __init__(self, benchmark, generation_num, inversion_rate, mutation_rate, w_x=1, w_y=2, crossover_type="order", population_size=24, crossover_rate=1.0, plot_enable=False):
+		self.benchmark = benchmark
 		self.ny, self.nx, self.total_cell_num, self.nets = preprocess("benchmarks_a2/"+benchmark+".txt")
 		self.crossover_rate = crossover_rate
 		self.inversion_rate = inversion_rate
@@ -25,11 +26,17 @@ class GeneticPlacement():
 		self.crossover_type = crossover_type
 		self.population_size = population_size
 		self.generation_num = generation_num
+		self.plot_enable = plot_enable
+
+		self.historic_mean_cost = []
+		self.historic_min_cost = []
+		self.historic_diff = []
 
 		random.seed(10)
 		self.init_population()
 
 	def run(self):
+		print("**********"+self.benchmark+"**********")
 		for i in range(self.generation_num):
 			self.generation()
 		max_f = 0
@@ -39,7 +46,8 @@ class GeneticPlacement():
 			if f > max_f:
 				max_f = f
 				solution = chromosome
-		print(self.evaluate_fitness(solution))
+		self.plot(final_solution=True)
+		print("Final cost:"+str(self.evaluate_fitness(solution)[1]))
 		return solution
 
 	def generation(self):
@@ -52,7 +60,11 @@ class GeneticPlacement():
 			cost_of_population.append(cost)
 			if random.random() < self.inversion_rate:
 				chromosome = self.inversion(chromosome)
-		print(mean(cost_of_population))
+		self.historic_mean_cost.append(mean(cost_of_population))
+		self.historic_min_cost.append(min(cost_of_population))
+		self.historic_diff.append(max(cost_of_population)-min(cost_of_population))
+		if self.plot_enable:
+			self.plot()
 		f_prob = [float(i)/sum(fitness_of_population) for i in fitness_of_population]
 
 		for chromosome in self.population:
@@ -65,8 +77,16 @@ class GeneticPlacement():
 				offspring = self.mutation(offspring)
 			self.population.append(offspring)
 
-		rand_selection = random.sample(range(floor(self.population_size*(1+self.crossover_rate))), self.population_size)
-		self.population = [self.population[i] for i in rand_selection]
+		for chromosome in self.population[self.population_size:]:
+			fitness, _ = self.evaluate_fitness(chromosome)
+			fitness_of_population.append(fitness)
+
+		# ***** Random Selection ***** #
+		# Random Selection does not work as well so we didn't go with this
+		# selection = random.sample(range(floor(self.population_size*(1+self.crossover_rate))), self.population_size)
+		# ***** Fitness Selection ***** #
+		selection = np.argpartition(fitness_of_population, -self.population_size)[-self.population_size:]
+		self.population = [self.population[i] for i in selection]
 
 	def init_population(self):
 		self.population = []
@@ -87,14 +107,6 @@ class GeneticPlacement():
 				if y >= self.ny:
 					y = 0
 			self.population.append(chromosome)
-			# # randomly generate initial positions
-			# rand_positions = random.sample(range(self.ny*self.nx), self.total_cell_num)
-			# # decode pos into x, y coordinates, and update on grid
-			# for cell_num, pos in enumerate(rand_positions):
-			# 	new_gene = gene(cell_num)
-			# 	new_gene.update_location(pos%self.nx, floor(pos/self.nx))
-			# 	chromosome.append(new_gene)
-			# self.population.append(chromosome)
 
 	def evaluate_fitness(self, chromosome):
 		cost = 0
@@ -116,6 +128,12 @@ class GeneticPlacement():
 			assert(x_bound[1] >= 0 and y_bound[1] >= 0)
 			cost += self.w_x*(x_bound[1]-x_bound[0]) + self.w_y*(y_bound[1]-y_bound[0])
 		return 1/cost, cost
+
+	def test_chromosome(self, chromosome):
+		cell = set()
+		for gene in chromosome:
+			assert(gene.cell_num not in cell)
+			cell.add(gene.cell_num)
 
 	def mutation(self, chromosome):
 		i1, i2 = random.sample(range(self.total_cell_num), 2)
@@ -159,14 +177,7 @@ class GeneticPlacement():
 								found = 1
 						assert(found==1)
 					i += 1
-		return offspring
-
-	def test_chromosome(self, chromosome):
-		cell = set()
-		for gene in chromosome:
-			assert(gene.cell_num not in cell)
-			cell.add(gene.cell_num)
-
+		# *****Implementation of PMT and Cycle Crossover, unused*****
 		# elif self.crossover_type == "PMT":
 		# 	offspring[cut_i:] = p2[cut_i:]
 		# 	for i in range(cut_i,self.cell_num):
@@ -203,3 +214,17 @@ class GeneticPlacement():
 		# 			if gene is None:
 		# 				next_i = i
 		# 				break
+		return offspring
+
+	def plot(self, final_solution=False):
+		plt.title('cost over generations')
+		plt.plot(self.historic_mean_cost)
+
+		x = np.arange(len(self.historic_mean_cost))
+		plt.bar(x, self.historic_diff, bottom=self.historic_min_cost)
+
+		plt.show(block=False)
+		if final_solution:
+			plt.savefig("figs/"+self.benchmark+".png")
+		plt.pause(1)
+		plt.close()
