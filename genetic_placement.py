@@ -50,6 +50,7 @@ class GeneticPlacement():
 		print("Final cost:"+str(self.evaluate_fitness(solution)[1]))
 		return solution
 
+	# The operation for each generation
 	def generation(self):
 		assert(len(self.population)==self.population_size)
 		fitness_of_population = []
@@ -225,6 +226,6 @@ class GeneticPlacement():
 
 		plt.show(block=False)
 		if final_solution:
-			plt.savefig("figs/"+self.benchmark+".png")
-		plt.pause(1)
+			plt.savefig("./fig/placement"+self.benchmark+".png")
+		plt.pause(0.5)
 		plt.close()

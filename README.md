@@ -30,3 +30,15 @@ Each cell of the heat map represents a chromosome in the population, and the col
 #### Cost Plot
 Once the heat map animation is closed, a cost over iteration plot is rendered:
 ![alt text](./fig/plot_example.png "Plot Example")
+
+## Placement
+To run:
+
+```
+python3 main_placement.py
+```
+
+All the parameters and benchmarks can be set in main_placement.py
+### Cost Plot
+The cost plot can be dynamically displayed if plot_enable=True, otherwise a final cost plot is saved.
+![alt text](./fig/placement/alu2.txt "Plot Example")
